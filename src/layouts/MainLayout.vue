@@ -29,7 +29,9 @@
             color="primary"
             label="sair"
             @click="logout"
-          />
+          >
+          <q-tooltip>{{user?.email}}</q-tooltip>
+          </q-btn>
         </div>
 
       </q-toolbar>
@@ -77,18 +79,24 @@ export default defineComponent({
    data () {
     return {
       tab: 'home',
+      usuario: null
     }
   },
 
   computed: {
-    user: function () {
-      return this.$q.localStorage.getItem('user') || 'logout'
+    user: {
+      get: function () {
+        return this.usuario
+      },
+      set: function (newValue) {
+        this.usuario = newValue
+      }
     }
   },
-
-  components: {
-  },
   methods: {
+    setUsuario () {
+      this.user = this.$q.localStorage.getItem('user')
+    },
     logout () {
       this.$q.localStorage.clear('user')
       window.location.reload()
