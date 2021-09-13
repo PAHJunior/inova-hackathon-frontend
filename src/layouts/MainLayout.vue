@@ -3,7 +3,10 @@
     <q-header>
       <q-toolbar class="bg-grey-4">
 
-        <svg viewBox="-800 -30 5200 250">
+        <svg
+          :viewBox="this.$q.screen.lt.md ? '-100 -30 1500 250' : '-800 -30 5200 250'"
+          @click="routesView('home')"
+        >
           <use xlink:href="logo-de-olho.svg#image0"></use>
         </svg>
 
@@ -18,7 +21,7 @@
           <q-btn
             color="primary"
             label="cadastrar"
-            to="singin"
+            to="singup"
           />
         </div>
         <div v-else class="col-2">
@@ -34,7 +37,7 @@
     <q-page-container>
       <img
         class="absolute-top"
-        style="width: 100%; height: 94%;"
+        style="width: 100%; height: 92%;"
         src="~/assets/BG_desktop.png"
       >
       <router-view />
@@ -95,8 +98,8 @@ export default defineComponent({
         case 'home':
           this.$router.push('/')
           break;
-        case 'search':
-          this.$router.push('/search')
+        case 'login':
+          this.$router.push('/login')
           break;
       }
     }
