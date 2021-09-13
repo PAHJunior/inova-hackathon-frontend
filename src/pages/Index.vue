@@ -137,7 +137,7 @@
                     {{ props.row.name }}
                   </q-card-section>
                   <q-list dense>
-                    <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name">
+                    <q-item v-for="col in props.cols.filter(col => col.name !== 'title')" :key="col.name">
                       <q-item-section>
                         <q-item-label :class="col.style">{{ col.value }}</q-item-label>
                       </q-item-section>
@@ -145,9 +145,11 @@
                   </q-list>
                   <q-card-section>
                     <q-badge
+                      v-for=" (category, index) in categories"
+                      :key="index"
                       class="cursor-pointer"
                       color="primary"
-                      label="Auxílio Emergencial"
+                      :label="category"
                     />
                   </q-card-section>
                   <q-card-section>
@@ -164,7 +166,7 @@
               </div>
             </template>
             <template v-slot:no-data="{ message }">
-            <div class="full-width row flex-center text-primary q-gutter-sm">
+            <div class="full-width row text-h6 flex-center text-primary q-gutter-sm">
               <span>
                 {{ message }}
               </span>
@@ -193,21 +195,20 @@ import ServiceProposal from '../service/proposals'
 
 const columns = [
   {
-    name: 'desc',
+    name: 'title',
     required: true,
-    align: 'left',
     field: row => row.name,
     format: val => `${val}`,
     sortable: true
   },
   { style: 'text-weight-bold text-grey-6 text-subtitle1',
-    name: 'calories',
-    field: 'calories',
+    name: 'author',
+    field: 'author',
     sortable: true
   },
   { style: 'text-weight-regular text-grey',
-    name: 'fat',
-    field: 'fat',
+    name: 'description',
+    field: 'description',
     sortable: true
   }
 ]
@@ -262,8 +263,7 @@ export default defineComponent({
         })
     },
     doSearch () {
-      // this.$q.loading.show()
-
+      this.$q.loading.show()
       const categories = Object.keys(this.categories)
         .filter((key) => {
           return this.categories[key]
@@ -277,9 +277,17 @@ export default defineComponent({
 
       ServiceProposal.getQuery(query)
         .then((response) => {
+          console.log(response)
           this.row = response.data.map((val) => {
             return {
-              ...val
+              author: val.author,
+              cidade: val.cidade,
+              description: val.description,
+              title: val.title,
+              uf: val.uf,
+              categories: val.categories.map((val) => {
+              return val
+              })
             }
           })
         })
@@ -287,7 +295,7 @@ export default defineComponent({
           console.error(err)
         })
         .finally(() => {
-          // this.$q.loading.hide()
+          this.$q.loading.hide()
         })
     }
   }
