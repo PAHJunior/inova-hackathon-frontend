@@ -4,7 +4,7 @@
       <use xlink:href="logo-de-olho.svg#image0"></use>
     </svg>
     <div class="row justify-center">
-      <div class=" offset-md-4 col-md-8 col-xs-12">
+      <div class=" offset-md-3 col-md-9 col-xs-12">
         <span class="text-h5 text-weight-bold text-grey-9">
           Encontre e acompanhe informações de dados públicos fornecidos por
           <span class="text-green-12">fontes seguras</span>
@@ -19,7 +19,9 @@
           class="q-py-md"
           bg-color="white"
           v-model="model.mainSeeker"
-          debounce="600"
+          debounce="1800"
+          :loading="loading"
+          @update:model-value="doSearch()"
           label="Faça sua pesquisa"
         >
           <template v-slot:after>
@@ -93,7 +95,6 @@
             </q-btn-dropdown>
           </template>
         </q-input>
-        <q-btn label="teste" @click="doSearch()" />
         <span class=" text-center text-weight-medium text-grey-5">
           Tags sugeridos para pesquisa
         </span>
@@ -106,6 +107,7 @@
             dense
             color="primary"
             text-color="white"
+            @click="doSearch()"
             :outline="!categories[index]"
           >
             {{ index }}
@@ -134,10 +136,13 @@
               >
                 <q-card :style="`border-left: 7px solid #1976D2`" >
                   <q-card-section class="text-h6 text-weight-bold text-grey-8">
-                    {{ props.row.name }}
+                    {{ props.row.title }}
                   </q-card-section>
                   <q-list dense>
-                    <q-item v-for="col in props.cols.filter(col => col.name !== 'title')" :key="col.name">
+                    <q-item
+                      v-for="col in props.cols.filter(col => col.name !== 'title')"
+                      :key="col.name"
+                    >
                       <q-item-section>
                         <q-item-label :class="col.style">{{ col.value }}</q-item-label>
                       </q-item-section>
@@ -145,9 +150,9 @@
                   </q-list>
                   <q-card-section>
                     <q-badge
-                      v-for=" (category, index) in categories"
+                      v-for=" (category, index) in props.row.categories"
                       :key="index"
-                      class="cursor-pointer"
+                      class="cursor-pointer q-ma-xs"
                       color="primary"
                       :label="category"
                     />
@@ -193,63 +198,48 @@ import { reactive, ref, computed, defineComponent } from 'vue'
 import ServiceCategories from '../service/categories'
 import ServiceProposal from '../service/proposals'
 
-const columns = [
-  {
-    name: 'title',
-    required: true,
-    field: row => row.name,
-    format: val => `${val}`,
-    sortable: true
-  },
-  { style: 'text-weight-bold text-grey-6 text-subtitle1',
-    name: 'author',
-    field: 'author',
-    sortable: true
-  },
-  { style: 'text-weight-regular text-grey',
-    name: 'description',
-    field: 'description',
-    sortable: true
-  }
-]
-
-const rows = []
 export default defineComponent({
   name: 'PageIndex',
   mounted () {
     this.getCategories()
   },
-  setup () {
-    const pagination = ref({
-      sortBy: 'desc',
-      descending: false,
-      page: 1,
-      rowsPerPage: 3
-      // rowsNumber: xx if getting data from a server
-    })
-    let categoryElements = null
-
-    return {
-      pagination,
-      columns,
-      rows,
-      selectionCategories: computed(() => {
-        return Object.keys(categories)
-          .filter(type => categories[ type ] === true)
-          .join(', ')
-      }),
-
-      pagesNumber: computed(() => Math.ceil(rows.length / pagination.value.rowsPerPage))
-    }
-  },
   data () {
     return {
+      loading: false,
+      rows: [],
       categories: [],
       model: {
         mainSeeker: null,
         cidade: 'municípios',
         categories: []
-      }
+      },
+      rowsOptions: [3, 5, 7, 10, 15, 25, 50, 0],
+      pagesNumber: null,
+      pagination: {
+        page: 6,
+        sortBy: 'desc',
+        descending: true,
+        rowsPerPage: 3
+      },
+      columns: [
+        {
+          name: 'title',
+          required: true,
+          field: row => row.name,
+          format: val => `${val}`,
+          sortable: true
+        },
+        { style: 'text-weight-bold text-grey-6 text-subtitle1',
+          name: 'author',
+          field: 'author',
+          sortable: true
+        },
+        { style: 'text-weight-regular text-grey',
+          name: 'description',
+          field: 'description',
+          sortable: true
+        }
+      ]
     }
   },
   methods: {
@@ -263,7 +253,7 @@ export default defineComponent({
         })
     },
     doSearch () {
-      this.$q.loading.show()
+      this.loading = true
       const categories = Object.keys(this.categories)
         .filter((key) => {
           return this.categories[key]
@@ -277,10 +267,9 @@ export default defineComponent({
 
       ServiceProposal.getQuery(query)
         .then((response) => {
-          console.log(response)
-          this.row = response.data.map((val) => {
+          this.rows = response.data.map((val) => {
             return {
-              author: val.author,
+              author: val.author +' - '+ val.cidade + ' / ' + val.uf,
               cidade: val.cidade,
               description: val.description,
               title: val.title,
@@ -290,12 +279,13 @@ export default defineComponent({
               })
             }
           })
+          console.log(this.rows)
         })
         .catch((err) => {
           console.error(err)
         })
         .finally(() => {
-          this.$q.loading.hide()
+          this.loading = false
         })
     }
   }

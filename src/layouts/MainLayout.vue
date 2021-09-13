@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr fff">
-    <q-header elevated>
+    <q-header>
       <q-toolbar class="bg-grey-4">
 
         <svg viewBox="-800 -30 5200 250">
@@ -36,7 +36,6 @@
           @click="routesView(tab)"
         >
           <q-tab name="home" label="HOME" />
-          <q-tab name="search" label="BUSCADOR" />
           <q-tab name="aboutUs" label="SOBRE NÓS" />
           <q-tab name="team" label="EQUIPE" />
           <q-tab name="service" label="SERVIÇOS" />
