@@ -6,16 +6,28 @@
         <svg viewBox="-800 -30 5200 250">
           <use xlink:href="logo-de-olho.svg#image0"></use>
         </svg>
-        <q-btn
-          flat
-          class="q-pr-md"
-          color="primary"
-          label="entrar"
-        />
-        <q-btn
-          color="primary"
-          label="cadastrar"
-        />
+
+        <div v-if="user === 'logout'" class="col-2">
+          <q-btn
+            flat
+            class="q-pr-md"
+            color="primary"
+            label="entrar"
+            to="login"
+          />
+          <q-btn
+            color="primary"
+            label="cadastrar"
+            to="singin"
+          />
+        </div>
+        <div v-else class="col-2">
+          <q-btn
+            color="primary"
+            label="sair"
+            @click="logout"
+          />
+        </div>
 
       </q-toolbar>
     </q-header>
@@ -55,19 +67,29 @@
 </template>
 <script>
 
-import { defineComponent, ref } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'MainLayout',
    data () {
     return {
-      tab: 'home'
+      tab: 'home',
+    }
+  },
+
+  computed: {
+    user: function () {
+      return this.$q.localStorage.getItem('user') || 'logout'
     }
   },
 
   components: {
   },
   methods: {
+    logout () {
+      this.$q.localStorage.clear('user')
+      window.location.reload()
+    },
     routesView (params) {
       switch (params) {
         case 'home':
@@ -77,7 +99,6 @@ export default defineComponent({
           this.$router.push('/search')
           break;
       }
-      
     }
   },
 

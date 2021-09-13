@@ -2,9 +2,9 @@
   <div class="row justify-center items-center"
     style="height: 32rem"
   >
-  <div class="col-12 text-center text-weight-medium text-grey-8">
-    Bem vindo de volta, forneça seus dados para se logar na plataforma.
-  </div>
+    <div class="col-12 text-center text-h5 text-weight-medium text-grey-8 q-pa-xl">
+      <span>Bem vindo de volta, forneça seus dados para se logar na plataforma.</span>
+    </div>
     <q-card class="row q-col-gutter-sm q-pa-sm col-xs-10 col-md-4">
       <div class="text-grey-8 text-weight-bold text-h5 q-py-md">
         Faça seu login
@@ -50,7 +50,7 @@
           flat
           color="primary"
           label="cadastrar-se"
-          @click="processLogin()"
+          @click="processSingup()"
           class="col-12"
         />
       </div>
@@ -59,10 +59,10 @@
 </template>
 <script>
 import { openURL } from 'quasar'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 export default {
   mounted () {
-    // this.$q.localStorage.clear('dataUser')
+    this.$q.localStorage.clear('user')
   },
   data () {
     return {
@@ -86,8 +86,9 @@ export default {
       const auth = getAuth()
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          let user = userCredential.user;
-          console.log(user)
+          let { user } = userCredential
+          this.$q.localStorage.set('user', user);
+          this.$router.push('/')
         })
         .catch((error) => {
           console.log(error.message)
@@ -101,6 +102,9 @@ export default {
         .finally(() => {
           // this.$q.loading.hide()
         })
+    },
+    processSingup () {
+      this.$router.push('/singup')
     }
   }
 }
